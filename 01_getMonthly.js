@@ -2,6 +2,7 @@ var asset = 'projects/nexgenmap/TRANSVERSAIS/AGUA5-FT-CERRADO-COL5';
 
 var cadence = 'monthly';
 
+var version = '11'
 // set year
 var years = ee.List.sequence({'start': 1985, 'end': 2025, 'step': 1}).getInfo();
 
@@ -16,7 +17,7 @@ var territory = ee.Image('projects/mapbiomas-workspace/AUXILIAR/biomas-2019-rast
 var scale = 30;
 
 // define a Google Drive output folder 
-var driverFolder = 'mapb-water-col5-v11';
+var driverFolder = 'mapb-water-col5-v' + version + 'b';
 
 // Image area in hectares
 var pixelArea = ee.Image.pixelArea().divide(10000);
@@ -68,7 +69,7 @@ years.forEach(function(year) {
     
     // read monthly 
     var monthly = ee.ImageCollection(asset)
-                   .filter(ee.Filter.eq('version', '11'))
+                   .filter(ee.Filter.eq('version', version))
                    .filter(ee.Filter.eq('cadence', cadence))
                    .filter(ee.Filter.eq('year', year))
                    .mosaic()
@@ -84,7 +85,8 @@ years.forEach(function(year) {
                 function (feature) {
                     return feature.set('year', year)
                                   .set('month', month)
-                                  .set('cadence', cadence);
+                                  .set('cadence', cadence)
+                                  .set('version', version);
                 }
             );
             return areas;
@@ -95,7 +97,7 @@ years.forEach(function(year) {
   
     Export.table.toDrive({
         collection: areas,
-        description: 'water-' + cadence + '-' + 'CERRADO' + '-' + year + '-' + month,
+        description: 'water-' + cadence + '-' + 'CERRADO' + '-' + year + '-' + month + '-' + 'v' + version,
         folder: driverFolder,
         fileFormat: 'CSV'
     });
