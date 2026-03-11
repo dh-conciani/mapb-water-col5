@@ -75,27 +75,25 @@ var calculateArea = function (image, territory, geometry) {
 
 var recipe2 = ee.FeatureCollection([])
 
-// for each year
-years.forEach(function(year) {
+// for each month
+months.forEach(function(month) {
   
   var recipe = ee.FeatureCollection([]);
-  
-  months.forEach(function(month) {
-    
-    // read monthly 
-    var monthly = ee.ImageCollection(asset)
-                   .filter(ee.Filter.eq('version', version))
-                   .filter(ee.Filter.eq('cadence', cadence))
-                   .filter(ee.Filter.eq('year', year))
-                   .mosaic()
-                   .select('classification_' + month)
     
     // perform per year 
-    var areas = [month].map(
-        function (month) {
-            var image = monthly;
+    var areas = years.map(
+        function (year) {
+            // read monthly 
+            var image = ee.ImageCollection(asset)
+                           .filter(ee.Filter.eq('version', version))
+                           .filter(ee.Filter.eq('cadence', cadence))
+                           .filter(ee.Filter.eq('year', year))
+                           .mosaic()
+                           .select('classification_' + month)
+                           
             var areas = calculateArea(image, territory, geometry);
             // set additional properties
+            
             areas = areas.map(
                 function (feature) {
                     return feature.set('year', year)
@@ -112,15 +110,9 @@ years.forEach(function(year) {
     
     areas = ee.FeatureCollection(areas).flatten();
     
-    recipe = recipe.merge(areas);
+    recipe2 = recipe2.merge(areas)
         
   })
- 
-     
-  recipe2 = recipe2.merge(recipe);
-  
-  
-});
 
 Export.table.toDrive({
         collection: recipe2,
