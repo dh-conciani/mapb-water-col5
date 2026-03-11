@@ -6,12 +6,14 @@ var geometry =
           [-39.96630829754433, -1.7087981026668047]]], null, false);
 
 var asset = 'projects/nexgenmap/TRANSVERSAIS/AGUA5-FT-CERRADO-COL5';
+//var asset =  'projects/nexgenmap/TRANSVERSAIS/AGUA5-FT'
 
 var cadence = 'monthly';
 
 var version = '11'
 
-var obs = 'new';
+var obs = 'new'
+//var obs = 'old';
 
 // set year
 var years = ee.List.sequence({'start': 1985, 'end': 2025, 'step': 1}).getInfo();
