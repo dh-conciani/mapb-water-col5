@@ -5,15 +5,15 @@ var geometry =
           [-39.96630829754433, -26.702057803681825],
           [-39.96630829754433, -1.7087981026668047]]], null, false);
 
-var asset = 'projects/nexgenmap/TRANSVERSAIS/AGUA5-FT-CERRADO-COL5';
-//var asset =  'projects/nexgenmap/TRANSVERSAIS/AGUA5-FT'
+//var asset = 'projects/nexgenmap/TRANSVERSAIS/AGUA5-FT-CERRADO-COL5';
+var asset =  'projects/nexgenmap/TRANSVERSAIS/AGUA5-FT'
 
 var cadence = 'annual';
 
 var version = '11'
 
-var obs = 'new'
-//var obs = 'old';
+//var obs = 'new'
+var obs = 'old';
 
 // set year
 var years = ee.List.sequence(1985, 2025).remove(2020).getInfo();
@@ -70,50 +70,35 @@ var calculateArea = function (image, territory, geometry) {
     return areas;
 };
 
-var recipe2 = ee.FeatureCollection([])
-
-// for each year
-years.forEach(function(year) {
-  
-  // read annual 
-  var annual = ee.ImageCollection(asset)
+// perform per year 
+var areas = years.map(
+    function (year) {
+        var image = ee.ImageCollection(asset)
                  .filter(ee.Filter.eq('version', version))
                  .filter(ee.Filter.eq('cadence', cadence))
                  .filter(ee.Filter.eq('year', year))
                  .mosaic()
                  .select('classification')
-                 
-  //print(year, 'annual bands', annual.bandNames());
-  //Map.addLayer(annual)
-
+          
+        var areas = calculateArea(image, territory, geometry);
+        // set additional properties
+        areas = areas.map(
+            function (feature) {
+                return feature.set('year', year)
+                              .set('cadence', cadence)
+                              .set('version', version)
+                              .set('asset', asset)
+                              .set('obs', obs);
+            }
+        );
+        return areas;
+    }
+);
   
-  // perform per year 
-  var areas = years.map(
-      function (year) {
-          var image = annual;
-          var areas = calculateArea(image, territory, geometry);
-          // set additional properties
-          areas = areas.map(
-              function (feature) {
-                  return feature.set('year', year)
-                                .set('cadence', cadence)
-                                .set('version', version)
-                                .set('asset', asset)
-                                .set('obs', obs);
-              }
-          );
-          return areas;
-      }
-  );
-    
-
-  areas = ee.FeatureCollection(areas).flatten();
-  
-  recipe2 = recipe2.merge(areas)
-});
+areas = ee.FeatureCollection(areas).flatten();
 
 Export.table.toDrive({
-        collection: recipe2,
+        collection: areas,
         description: 'water-' + cadence + '-' + 'CERRADO' + '-' + obs + '-' + 'v' + version,
         folder: driverFolder,
         fileFormat: 'CSV'
