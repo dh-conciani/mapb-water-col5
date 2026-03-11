@@ -3,6 +3,9 @@ var asset = 'projects/nexgenmap/TRANSVERSAIS/AGUA5-FT-CERRADO-COL5';
 var cadence = 'monthly';
 
 var version = '11'
+
+var obs = 'new';
+
 // set year
 var years = ee.List.sequence({'start': 1985, 'end': 2025, 'step': 1}).getInfo();
 
@@ -11,13 +14,13 @@ var months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
 // read territories
 var territory = ee.Image('projects/mapbiomas-workspace/AUXILIAR/biomas-2019-raster')
-  .eq(4).selfMask().rename('territory');
+  .eq(4).selfMask().rename('territory').aside(Map.addLayer);
   
 // change the scale if you need.
 var scale = 30;
 
 // define a Google Drive output folder 
-var driverFolder = 'mapb-water-col5-v' + version + 'b';
+var driverFolder = 'mapb-water-col5-v' + version + 'c';
 
 // Image area in hectares
 var pixelArea = ee.Image.pixelArea().divide(10000);
@@ -64,6 +67,7 @@ var calculateArea = function (image, territory, geometry) {
 // for each year
 years.forEach(function(year) {
   
+  var recipe = ee.FeatureCollection([]);
   
   months.forEach(function(month) {
     
@@ -86,7 +90,9 @@ years.forEach(function(year) {
                     return feature.set('year', year)
                                   .set('month', month)
                                   .set('cadence', cadence)
-                                  .set('version', version);
+                                  .set('version', version)
+                                  .set('asset', asset)
+                                  .set('obs', obs);
                 }
             );
             return areas;
@@ -94,17 +100,17 @@ years.forEach(function(year) {
     );
     
     areas = ee.FeatureCollection(areas).flatten();
-  
-    Export.table.toDrive({
-        collection: areas,
-        description: 'water-' + cadence + '-' + 'CERRADO' + '-' + year + '-' + month + '-' + 'v' + version,
-        folder: driverFolder,
-        fileFormat: 'CSV'
-    });
+    
+    recipe = recipe.merge(areas)
         
   })
  
-  
+      Export.table.toDrive({
+        collection: recipe,
+        description: 'water-' + cadence + '-' + 'CERRADO' + '-' + year + '-' + obs + 'v' + version,
+        folder: driverFolder,
+        fileFormat: 'CSV'
+    });
   
   
   
