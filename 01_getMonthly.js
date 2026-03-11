@@ -3,10 +3,10 @@ var asset = 'projects/nexgenmap/TRANSVERSAIS/AGUA5-FT-CERRADO-COL5';
 var cadence = 'monthly';
 
 // set year
-var years = [2025];
+var years = ee.List.sequence({'start': 1985, 'end': 2025, 'step': 1}).getInfo();
 
 // set month
-var months = [9]
+var months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
 // read territories
 var territory = ee.Image('projects/mapbiomas-workspace/AUXILIAR/biomas-2019-raster')
