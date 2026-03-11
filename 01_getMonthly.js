@@ -122,7 +122,7 @@ years.forEach(function(year) {
 
 Export.table.toDrive({
         collection: recipe2,
-        description: 'water-' + cadence + '-' + 'CERRADO' + '-' + obs + 'v' + version,
+        description: 'water-' + cadence + '-' + 'CERRADO' + '-' + obs + '-' + 'v' + version,
         folder: driverFolder,
         fileFormat: 'CSV'
     });
