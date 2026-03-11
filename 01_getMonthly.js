@@ -1,3 +1,10 @@
+var geometry = 
+    ee.Geometry.Polygon(
+        [[[-62.46630829754432, -1.7087981026668047],
+          [-62.46630829754432, -26.702057803681825],
+          [-39.96630829754433, -26.702057803681825],
+          [-39.96630829754433, -1.7087981026668047]]], null, false);
+
 var asset = 'projects/nexgenmap/TRANSVERSAIS/AGUA5-FT-CERRADO-COL5';
 
 var cadence = 'monthly';
@@ -64,6 +71,8 @@ var calculateArea = function (image, territory, geometry) {
     return areas;
 };
 
+var recipe2 = ee.FeatureCollection([])
+
 // for each year
 years.forEach(function(year) {
   
@@ -101,20 +110,20 @@ years.forEach(function(year) {
     
     areas = ee.FeatureCollection(areas).flatten();
     
-    recipe = recipe.merge(areas)
+    recipe = recipe.merge(areas);
         
   })
  
-      Export.table.toDrive({
-        collection: recipe,
-        description: 'water-' + cadence + '-' + 'CERRADO' + '-' + year + '-' + obs + 'v' + version,
+     
+  recipe2 = recipe2.merge(recipe);
+  
+  
+});
+
+Export.table.toDrive({
+        collection: recipe2,
+        description: 'water-' + cadence + '-' + 'CERRADO' + '-' + obs + 'v' + version,
         folder: driverFolder,
         fileFormat: 'CSV'
     });
-  
-  
-  
-})
-
-
 
